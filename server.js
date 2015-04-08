@@ -42,6 +42,8 @@ app.use(express.static('../mallpoint/www'));
 
 require('./app/routes')(app);
 
+console.log(app._router.stack);
+
 //app.get('/sessions', sessions.findAll);
 //app.get('/sessions/:id', sessions.findById);
 

@@ -5,20 +5,12 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var userSchema = new Schema({
-    username:     String,
-    email:        String,
-    passwordHash: String,
-    firstName:    String,
-    lastName:     String
+    username:     { type: String, required: true, unique: true },
+    email:        { type: String, required: true, unique: true },
+    passwordHash: { type: String, required: true },
+    firstName:    { type: String, required: true },
+    lastName:     { type: String, required: true }
 });
-
-userSchema.methods.generateHash = function(password) {
-    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
-};
-
-userSchema.methods.verifyPassword = function(password) {
-    return bcrypt.compareSync(password, this.user.password);
-};
 
 // define our user model
 // module.exports allows us to pass this to other files when it is called
