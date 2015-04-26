@@ -9,7 +9,9 @@ var mallpointSchema = new Schema({
     latitude:     { type: Number, required: true },
     longitude:    { type: Number, required: true },
     name:         { type: String, required: true },
-    type:         { type: String },
+    type:         { type: String, required: true },
+    size:         { type: String, required: true, default: 'Shop' },
+    tags:         [ String ],
     imageUrl:     { type: String },
     owner:        { type: ObjectId, ref: 'User'},
     ratings:      [{

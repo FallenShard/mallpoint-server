@@ -19,13 +19,14 @@ module.exports = function(app) {
                 res.status(401).jsonp({ error: "Invalid email and/or password" });
             }
             else {
-                console.log("Authenticating user from autologin: " + user.username);
+                console.log(new Date().timeNow() + " Authenticating user from autologin: " + user.username);
                 res.status(200).jsonp(user);
             }
         });
     });
 
     app.post('/api/login', function(req, res) {
+        console.log(req.body);
         User.findOne({ 'email': req.body.email }, function(err, user) {
             if (err) {
                 console.error(err);

@@ -1,16 +1,18 @@
 {
-    "name": "mallpoint-server",
-    "version": "0.1.0",
-    "description": "Hybrid Web App Project",
-    "main": "server.js",
-    "dependencies": {
-        "express": "latest",
-        "mongoose": "latest",
-        "body-parser": "latest",
-        "method-override": "latest",
-        "bcrypt-nodejs": "latest"
-    },
-    "scripts": {
-        "start": "node server.js"
-    }
+  "name": "mallpoint-server",
+  "version": "0.1.0",
+  "description": "Hybrid Web App Project",
+  "main": "server.js",
+  "dependencies": {
+    "bcrypt-nodejs": "latest",
+    "body-parser": "latest",
+    "express": "latest",
+    "method-override": "latest",
+    "mongoose": "latest",
+    "ws": "latest",
+    "q": "latest"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
 }
