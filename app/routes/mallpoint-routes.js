@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
-var fs = require("fs");
+
+var gis = require('../gis-math');
 
 var ObjectId = mongoose.Schema.Types.ObjectId;
 
@@ -9,58 +10,17 @@ var Mallpoint = require('../models/mallpoint');
 
 module.exports = function(app) {
 
-    var rad2deg = function(rad) {
-        return rad * 180 / Math.PI;
-    };
-
-    var deg2rad = function(deg) {
-        return deg * Math.PI / 180;
-    };
-
-    var distance = function(lat1, lng1, lat2, lng2) {
-        lat1 = deg2rad(lat1);
-        lng1 = deg2rad(lng1);
-        lat2 = deg2rad(lat2);
-        lng2 = deg2rad(lng2);
-
-        var dist = Math.acos(Math.sin(lat1) * Math.sin(lat2)
-        + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng1 - lng2));
-
-        return 6371 * dist;
-    }
-
-    app.get('/api/mallpoints', function(req, res) {
-        Mallpoint.find({}).populate('owner').exec(function(err, mallpoints) {
-            if (err) {
-                console.error(err);
-                res.status(500).jsonp({ error: "There was an error with database"});
-                return;
-            }
-
-            res.status(200).jsonp(mallpoints);
-        });
-    });
-
     app.post('/api/mallpoints/radius', function(req, res) {
         var radius = req.body.radius || 0.3;
         var lat = req.body.lat;
         var lng = req.body.lng;
-        var userId = req.body.userId;
 
-        // earth's radius in km = ~6371
-        var earthRadius = 6371;
-
-        // latitude boundaries
-        var maxlat = lat + rad2deg(radius / earthRadius);
-        var minlat = lat - rad2deg(radius / earthRadius);
-
-        // longitude boundaries
-        var maxlng = lng + rad2deg(radius / earthRadius / Math.cos(deg2rad(lat)));
-        var minlng = lng - rad2deg(radius / earthRadius / Math.cos(deg2rad(lat)));
+        var lats = gis.getLatRange(lat, radius);
+        var lngs = gis.getLngRange(lng, lat, radius);
 
         Mallpoint.find({}).populate('owner')
-        .where('latitude').gt(minlat).lt(maxlat)
-        .where('longitude').gt(minlng).lt(maxlng)
+        .where('latitude').gt(lats.min).lt(lats.max)
+        .where('longitude').gt(lngs.min).lt(lngs.max)
         .exec(function(err, mallpoints) {
             if (err) {
                 console.error(err);
@@ -69,9 +29,8 @@ module.exports = function(app) {
             }
 
             for (var i = 0; i < mallpoints.length; i++) {
-                var pointDistance = distance(lat, lng, mallpoints[i].latitude, mallpoints[i].longitude);
-                if (mallpoints[i].owner._id.toString() === userId.toString() || pointDistance > radius)
-                {
+                var pointDistance = gis.distance(lat, lng, mallpoints[i].latitude, mallpoints[i].longitude);
+                if (pointDistance > radius) {
                     mallpoints.splice(i, 1);
                     i--;
                 }
@@ -91,8 +50,7 @@ module.exports = function(app) {
         filter.size = req.body.size || '';
 
         var sizeQuery = null;
-        if (filter.size !== '')
-        {
+        if (filter.size !== '') {
             sizeQuery = {};
             sizeQuery.size = filter.size;
         }
@@ -132,8 +90,7 @@ module.exports = function(app) {
     });
 
     app.post('/api/mallpoints/user', function(req, res) {
-
-        Mallpoint.find({ owner: req.body._id}).exec(function(err, mallpoints) {
+        Mallpoint.find({ owner: req.body.userId }).exec(function(err, mallpoints) {
             if (err) {
                 console.error(err);
                 res.status(500).jsonp({ error: "There was an error with database"});
@@ -177,11 +134,5 @@ module.exports = function(app) {
                 res.status(403).jsonp({ error: "There was an error processing your request"});
             }
         });
-    });
-
-    app.post('/api/mallpoints/photo', function(req, res) {
-
-        fs.writeFile("lelwhut.jpg", new Buffer(req.body.data, "base64"), function(err) {});
-        res.status(200).jsonp({ message: "Nice" });
     });
 };

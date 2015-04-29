@@ -9,8 +9,7 @@
     "express": "latest",
     "method-override": "latest",
     "mongoose": "latest",
-    "ws": "latest",
-    "q": "latest"
+    "ws": "latest"
   },
   "scripts": {
     "start": "node server.js"

@@ -43,10 +43,34 @@ app.use(express.static('../mallpoint/www'));
 require('./app/routes/user-routes')(app);
 require('./app/routes/mallpoint-routes')(app);
 
-websocketServ.listen(5001);
+
+// Grab the network address
+var os = require( 'os' );
+var ifaces = os.networkInterfaces();
+var serverIP = '';
+
+Object.keys(ifaces).forEach(function (ifname) {
+    var alias = 0;
+
+    ifaces[ifname].forEach(function (iface) {
+        if ('IPv4' !== iface.family || iface.internal !== false) {
+            return;
+        }
+
+        if (alias < 1) {
+            serverIP = iface.address;
+        }
+
+        alias++;
+    });
+});
+
 
 app.listen(port, function () {
-    console.log(new Date().timeNow() + 'Express server is listening on port ' + port);
+    console.log(new Date().timeNow() + ' Node server starting up on address ' + serverIP);
+    console.log(new Date().timeNow() + ' Express server is listening on port ' + port);
+
+    websocketServ.listen(5001);
 });
 
 exports = module.exports = app;
